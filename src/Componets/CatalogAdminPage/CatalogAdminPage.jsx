@@ -12,23 +12,13 @@ import {
     Typography,
 } from '@mui/material';
 import axios from 'axios';
+import { useNavigate } from 'react-router';
 
 const drawerWidth = 240;
 
 const CatalogTable = () => {
     const [products, setProducts] = useState([]);
-    const [openEdit, setOpenEdit] = useState(false);
-    const [currentProduct, setCurrentProduct] = useState(null);
-
-    const openEditDialog = (product) => {
-    setCurrentProduct(product); // Set the product to be edited
-    setOpenEdit(true); // Open the edit dialog
-};
-const closeEditDialog = () => {
-    setOpenEdit(false);
-    setCurrentProduct(null);
-};
-
+    const navigate = useNavigate();
 
 
     useEffect(() => {
@@ -42,34 +32,15 @@ const closeEditDialog = () => {
             });
     }, []);
 
-    const handleUpdate = (updatedProduct) => {
-        console.log('updatedProduct', updatedProduct);
-
-        if (!updatedProduct || !updatedProduct) {
-            console.error('Invalid product data');
-            return;
-        }
-
-        axios
-            .put(`http://localhost:3005/products/${updatedProduct}`, updatedProduct)
-            .then((response) => {
-                console.log('Product updated successfully:', response.data);
-
-                setProducts((prevProducts) =>
-                    prevProducts.map((product) =>
-                        product.id === updatedProduct.id ? response.data : product
-                    )
-                );
-            })
-            .catch((error) => {
-                console.error('Error updating product:', error);
-            });
+  
+    const handleUpdate = (product) => {
+       
+        navigate("/UploadCatelog", { state: { product } });
+        console.log("Navigating with product:", product);
     };
 
-
+    
     const handleDelete = (id) => {
-        console.log('ididid', id);
-
         axios
             .delete(`http://localhost:3005/products/${id}`)
             .then(() => {
@@ -83,21 +54,17 @@ const closeEditDialog = () => {
             });
     };
 
-
-
-
-
-
-
-
     return (
-        <TableContainer component={Paper} sx={{
-            flexGrow: 1,
-            paddingLeft: '20px',
-            width: { sm: `calc(100% - ${drawerWidth}px)` },
-            ml: { sm: `${drawerWidth}px` },
-            paddingTop: '97px',
-        }}>
+        <TableContainer
+            component={Paper}
+            sx={{
+                flexGrow: 1,
+                paddingLeft: '20px',
+                width: { sm: `calc(100% - ${drawerWidth}px)` },
+                ml: { sm: `${drawerWidth}px` },
+                paddingTop: '97px',
+            }}
+        >
             <Table>
                 <TableHead>
                     <TableRow>
@@ -131,7 +98,7 @@ const closeEditDialog = () => {
                             <TableCell>
                                 <Button
                                     variant="outlined"
-                                    onClick={() => handleUpdate(product._id)}
+                                    onClick={() => handleUpdate(product)}
                                 >
                                     Update
                                 </Button>
@@ -139,10 +106,7 @@ const closeEditDialog = () => {
                                     variant="outlined"
                                     color="error"
                                     sx={{ ml: 1 }}
-                                    onClick={() => {
-                                        handleDelete(product._id)
-                                        console.log('dddddd', product._id);
-                                    }}
+                                    onClick={() => handleDelete(product._id)}
                                 >
                                     Delete
                                 </Button>

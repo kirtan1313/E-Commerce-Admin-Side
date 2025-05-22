@@ -16,8 +16,22 @@ import {
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
+import { useLocation, useNavigate } from "react-router";
 
 const UploadCatalog = () => {
+
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Extract product data from location state
+  const { product } = location.state || {};
+
+  console.log("prodct update naviigateion",product);
+  
+
+
+
+
   const [file, setFile] = useState(null);
   const [productName, setProductName] = useState("");
   const [category, setCategory] = useState("Men");
