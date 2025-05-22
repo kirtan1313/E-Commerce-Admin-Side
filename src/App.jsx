@@ -7,6 +7,7 @@ import Users from './Componets/UploadCatelog/UploadCatelog';
 import Orders from './Componets/Orders/Orders';
 import Logout from './Componets/Logout/Logout';
 import UploadCatelog from './Componets/UploadCatelog/UploadCatelog';
+import CatalogAdminPage from './Componets/CatalogAdminPage/CatalogAdminPage';
 
 function App() {
   const theme = createTheme({
@@ -21,6 +22,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/UploadCatelog" element={<UploadCatelog />} />
+          <Route path='/CatalogAdminPage' element={< CatalogAdminPage />}/>
           <Route path="/orders" element={<Orders />} />
           <Route path="/logout" element={<Logout />} />
         </Routes>

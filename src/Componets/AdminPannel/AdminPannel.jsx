@@ -16,6 +16,7 @@ import {
 import { Dashboard, People, ShoppingCart, ExitToApp, Menu as MenuIcon } from "@mui/icons-material";
 import {  useNavigate } from "react-router-dom";
 import logo from '../../assets/Images/logo.png'
+import { GrCatalog } from "react-icons/gr";
 
 
 const drawerWidth = 240;
@@ -32,7 +33,7 @@ function AdminPanel() {
     { text: "Dashboard", icon: <Dashboard />, path: "/" },
     { text: "UploadCatelog", icon: <People />, path: "/UploadCatelog" },
     { text: "Orders", icon: <ShoppingCart />, path: "/orders" },
-    // { text: "Logout", icon: <ExitToApp />, path: "/logout" },
+    { text: "Catalog", icon: <GrCatalog />, path: "/CatalogAdminPage" }
   ];
 
 
@@ -40,13 +41,10 @@ function AdminPanel() {
     "/": "Dashboard",
     "/UploadCatelog": "Upload Catalog",
     "/orders": "Orders",
-    // "/logout": "Logout",
+    "/CatalogAdminPage":"Catalog"
   };
 
   const currentPageTitle = pageTitles[location.pathname] || "Admin Dashboard";
-
-
-
 
   const drawerContent = (
     <Box>
