@@ -12,47 +12,64 @@ import {
     Typography,
 } from '@mui/material';
 import axios from 'axios';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 
 const drawerWidth = 240;
 
 const CatalogTable = () => {
     const [products, setProducts] = useState([]);
+    const location = useLocation();
     const navigate = useNavigate();
 
-
+    // Fetch products initially
     useEffect(() => {
-        axios
-            .get('http://localhost:3005/products')
-            .then((response) => {
-                setProducts(response.data);
-            })
-            .catch((error) => {
-                console.error('Error fetching products:', error);
-            });
+        axios.get('http://localhost:3005/products')
+            .then((response) => setProducts(response.data))
+            .catch((error) => console.error('Error fetching products:', error));
     }, []);
 
-  
-    const handleUpdate = (product) => {
-       
-        navigate("/UploadCatelog", { state: { product } });
-        console.log("Navigating with product:", product);
+    // Handle the updated product if passed from UploadCatelog
+    useEffect(() => {
+        console.log("Location state in CatalogTable:", location.state);
+        if (location.state && location.state.updatedProduct) {
+            const updatedProduct = location.state.updatedProduct;
+            console.log('Upadte Productt Replace', updatedProduct);
+
+            setProducts((prevProducts) =>
+                prevProducts.map((product) =>
+                    product.id === updatedProduct.id ? { ...product, ...updatedProduct } : product
+                )
+            );
+        }
+    }, [location.state]);
+
+
+    const handleUpdate = (updatedProduct) => {
+        const { img, productName, category, price, stock, _id } = updatedProduct;
+
+        navigate("/UploadCatelog", {
+            state: { product: [img, productName, category, price, stock, _id] },
+        });
     };
 
-    
-    const handleDelete = (id) => {
+
+
+
+    const handleDelete = (deleteProduct) => {
+        console.log('id', deleteProduct);
+
         axios
-            .delete(`http://localhost:3005/products/${id}`)
+            .delete(`http://localhost:3005/products/${deleteProduct}`)
             .then(() => {
-                console.log('Product deleted successfully');
                 setProducts((prevProducts) =>
-                    prevProducts.filter((product) => product.id !== id)
+                    prevProducts.filter((product) => product.id !== deleteProduct)
                 );
             })
             .catch((error) => {
-                console.error('Error deleting product:', error);
+                console.error("Error deleting product:", error);
             });
     };
+
 
     return (
         <TableContainer

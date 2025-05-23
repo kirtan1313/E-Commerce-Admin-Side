@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -16,77 +16,133 @@ import {
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
-import { useLocation, useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const UploadCatalog = () => {
-
   const location = useLocation();
   const navigate = useNavigate();
+  const productArray = location.state?.product || []; // Retrieve the array
 
-  // Extract product data from location state
-  const { product } = location.state || {};
+  const [productName, setProductName] = useState(productArray[1] || "");
+  const [category, setCategory] = useState(productArray[2] || "");
+  const [price, setPrice] = useState(productArray[3] || "");
+  const [stock, setStock] = useState(productArray[4] || "");
+  const [productId, setProductId] = useState(productArray[5] || null);
+  const [file, setFile] = useState(productArray[0] || null);
 
-  console.log("prodct update naviigateion",product);
-  
+
+
+  useEffect(() => {
+    if (productArray.length === 0) {
+      console.warn("No product data received for update.");
+    } else {
+      console.log("Product Data Received:", productArray);
+    }
+  }, [productArray]);
 
 
 
-
-  const [file, setFile] = useState(null);
-  const [productName, setProductName] = useState("");
-  const [category, setCategory] = useState("Men");
-  const [price, setPrice] = useState("");
-  const [stock, setStock] = useState("");
 
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
-    console.log("file", event.target.files[0]);
-
   };
 
 
-  const handleFormDataSubmit = async (e) => {
+
+
+  const handleCreateProduct = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("productName", productName);
+      formData.append("category", category);
+      formData.append("price", price);
+      formData.append("stock", stock);
+      if (file) {
+        formData.append("img", file);
+      }
+
+      // Post the new product to the backend
+      const response = await axios.post("http://localhost:3005/products", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      if (response.status === 200) {
+        toast.success("Product created successfully.");
+
+        // Redirect to CatalogAdminPage and ensure it fetches fresh data
+        navigate("/CatalogAdminPage", { replace: true });
+      }
+    } catch (error) {
+      console.error("Error creating product:", error.response || error.message);
+      toast.error("Failed to create product. Please try again.");
+    }
+  };
+
+
+
+
+  const handleUpdateProduct = async () => {
+    console.log('******', productId, productArray);
+
+    try {
+      const formData = new FormData();
+      formData.append("productName", productName);
+      formData.append("category", category);
+      formData.append("price", price);
+      formData.append("stock", stock);
+      if (file) {
+        formData.append("img", file);
+      }
+
+      console.log("API Endpoint:", `http://localhost:3005/products/${productId}`);
+      for (let pair of formData.entries()) {
+        console.log(`${pair[0]}: ${pair[1]}`);
+      }
+      
+      console.log("FormData before PUT request:");
+      const response = await axios.put(`http://localhost:3005/products/${productId}`, formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+
+      console.log("PUT Response:", response.data);
+
+
+      if (response.status === 200) {
+        toast.success("Product updated successfully.");
+        navigate("/CatalogAdminPage", { replace: true });
+      }
+    } catch (error) {
+      console.error("Error updating product:", error.response || error.message);
+      toast.error("Failed to update product. Please try again.");
+    }
+  };
+
+
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const handleFormSubmit = async (e) => {
     e.preventDefault();
 
-    if (!file || !productName || !category || !price || !stock) {
-      alert("All fields are required.");
+    if (!productName || !category || !price || !stock) {
+      toast.error("All fields are required.");
       return;
     }
 
-    const formData = new FormData();
-    formData.append("img", file);
-    formData.append("productName", productName);
-    formData.append("category", category);
-    formData.append("price", price);
-    formData.append("stock", stock);
+    if (isSubmitting) return;
+    setIsSubmitting(true);
 
     try {
-
-      const respons = await axios.post('http://localhost:3005/products', formData, {
-        headers: {
-          'Content-Type': "multipart/form-data",
-        }
-      })
-
-
-      if (respons.status === 200) {
-        toast.success('Product Upload SuccesFull');
+      if (productId) {
+        // Update existing product
+        await handleUpdateProduct();
+      } else {
+        // Create a new product
+        await handleCreateProduct();
       }
-
-    } catch (error) {
-      console.error("Error uploading product:", error);
-      toast.error("Failed to upload product. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setProductName('')
-    setFile('')
-    setCategory('')
-    setPrice('')
-    setStock('')
-
-  }
-
-
+  };
 
   return (
     <Box
@@ -102,8 +158,7 @@ const UploadCatalog = () => {
       <Card>
         <CardContent>
           <ToastContainer />
-          <form onSubmit={handleFormDataSubmit}>
-            {/* File Upload Section */}
+          <form onSubmit={handleFormSubmit}>
             <Grid container spacing={3}>
               <Grid item xs={12}>
                 <Typography variant="h6">Upload Product File</Typography>
@@ -131,13 +186,12 @@ const UploadCatalog = () => {
                       <CloudUploadIcon sx={{ fontSize: "40px" }} />
                     </IconButton>
                     <Typography variant="body1">
-                      {file ? file.name : "Click to upload file"}
+                      {file?.name || "Click to upload file"}
                     </Typography>
                   </label>
                 </Box>
               </Grid>
 
-              {/* Product Details Section */}
               <Grid item xs={12}>
                 <Typography variant="h6">Product Details</Typography>
               </Grid>
@@ -188,10 +242,9 @@ const UploadCatalog = () => {
                 />
               </Grid>
 
-              {/* Submit Button */}
               <Grid item xs={12}>
                 <Button variant="contained" color="primary" fullWidth type="submit">
-                  Upload Catalog
+                  {productId ? "Update Product" : "Upload Product"}
                 </Button>
               </Grid>
             </Grid>
