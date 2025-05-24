@@ -49,7 +49,9 @@ const CatalogTable = () => {
 
         navigate("/UploadCatelog", {
             state: { product: [img, productName, category, price, stock, _id] },
+            
         });
+        console.log('img',img);
     };
 
 
